@@ -64,6 +64,12 @@ The AI key settings endpoint is disabled by default because it changes credentia
 
 Railway deploys automatically from the connected GitHub branch when new commits are pushed.
 
+## Deploy to Google Cloud Run
+
+The repository includes a Dockerfile that listens on Cloud Run's injected `PORT` and bundles the YOLO weights. In Google Cloud Console, open **Cloud Run → Services → Connect repo**, connect GitHub, and select this repository and the `main` branch. Select **Dockerfile** as the build type, choose a region, and enable **Allow public access** so anyone can play. Start with 2 vCPU, 2 GiB memory, minimum instances 0, maximum instances 1, and concurrency 1; these limits keep the first deployment modest and prevent uncontrolled scaling. Cloud Run provides HTTPS automatically.
+
+Cloud Run is pay-as-you-go with monthly free usage allowances, not a guaranteed no-charge host. Inference requests may use CPU, and usage beyond the free allowance or other Google Cloud services can be billed. Check billing and set budget alerts in Google Cloud before making the service public. Google documents source-repository deployment in its [Cloud Run continuous deployment guide](https://cloud.google.com/run/docs/continuous-deployment) and current allowances in [Cloud Run pricing](https://cloud.google.com/run/pricing).
+
 ---
 
 ## Project Structure
