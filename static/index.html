@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0C0D0F">
+    <meta name="description" content="Tactile, minimalist AR scavenger hunt powered strictly by YOLOv8 and GenAI riddles.">
+    <title>SCAVENGER // YOLO Object Hunt</title>
+
+    <!-- Google Fonts for sleek editorial & monospace typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div id="app-root">
+
+        <!-- ==================== 1. LANDING VIEW ==================== -->
+        <main id="view-landing" class="app-view active">
+            <header class="landing-header">
+                <div class="system-tag">
+                    <span class="live-dot"></span>
+                    <span id="landing-ai-badge">● YOLOv8 REALTIME</span>
+                </div>
+                <button id="btn-open-settings" class="btn-icon" aria-label="Settings" title="Configure GenAI API">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
+            </header>
+
+            <section class="landing-hero">
+                <div class="brand-monogram">05</div>
+                <h1 class="brand-title">SCAVENGER</h1>
+                <p class="brand-subtitle">Tactile AR Hunt for Everyday Objects</p>
+
+                <div class="rules-card">
+                    <div class="rule-step">
+                        <span class="step-num">01</span>
+                        <div class="step-desc">
+                            <strong>Solve The Riddle</strong>
+                            <p>Read the poetic clue describing a common object near you.</p>
+                        </div>
+                    </div>
+                    <div class="rule-step">
+                        <span class="step-num">02</span>
+                        <div class="step-desc">
+                            <strong>Scan With Camera</strong>
+                            <p>Point your camera at the target. YOLO detects it instantly.</p>
+                        </div>
+                    </div>
+                    <div class="rule-step">
+                        <span class="step-num">03</span>
+                        <div class="step-desc">
+                            <strong>Beat The Clock</strong>
+                            <p>5 rounds. Faster finds earn higher bonus points.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <section class="points-card" aria-labelledby="points-title">
+                    <div class="points-card-header">
+                        <h2 id="points-title">POINTS</h2>
+                        <span>PER ROUND</span>
+                    </div>
+                    <table class="points-table">
+                        <tbody>
+                            <tr><th scope="row">Find the target</th><td>+1,000</td></tr>
+                            <tr><th scope="row">Time bonus</th><td>+15 / sec left</td></tr>
+                            <tr><th scope="row">No hints used</th><td>+200</td></tr>
+                            <tr><th scope="row">Hint 1 / Hint 2</th><td>−150 / −250</td></tr>
+                            <tr><th scope="row">Skip or timeout</th><td>0</td></tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <div class="landing-actions">
+                    <button id="btn-start-game" class="btn btn-primary btn-large">
+                        <span>START GAME</span>
+                        <span class="btn-arrow">→</span>
+                    </button>
+                    <p class="landing-note">Requires camera access · Strictly runs on YOLOv8</p>
+                </div>
+            </section>
+        </main>
+
+
+        <!-- ==================== 2. ACTIVE GAME VIEW ==================== -->
+        <main id="view-game" class="app-view">
+            <!-- Top HUD Bar -->
+            <header class="game-hud">
+                <div class="hud-item hud-round">
+                    <span class="hud-label">ROUND</span>
+                    <span id="hud-round" class="hud-value">01 / 05</span>
+                </div>
+                <div class="hud-item hud-timer-box">
+                    <span class="hud-label">REMAINING</span>
+                    <span id="hud-timer" class="hud-value timer-mono">01:00</span>
+                </div>
+                <div class="hud-item hud-score-box">
+                    <span class="hud-label">SCORE</span>
+                    <span id="hud-score" class="hud-value score-mono">0 PTS</span>
+                </div>
+            </header>
+
+            <!-- Camera Viewfinder Stage -->
+            <section class="viewport-stage">
+                <video id="camera-feed" autoplay playsinline muted></video>
+                <canvas id="xray-canvas"></canvas>
+
+                <!-- Floating Viewfinder Controls -->
+                <div class="viewfinder-overlay-controls">
+                    <button id="btn-xray" class="hud-chip" title="Toggle X-Ray Bounding Boxes">
+                        <span class="chip-dot"></span>
+                        <span class="btn-label">X-RAY: OFF</span>
+                    </button>
+
+                    <div class="hud-tools-right">
+                        <button id="btn-torch" class="tool-btn" title="Toggle Torch" style="display: none;">
+                            ⚡
+                        </button>
+                        <button id="btn-flip-camera" class="tool-btn" title="Switch Camera">
+                            🔄
+                        </button>
+                        <button id="btn-mute" class="tool-btn" title="Mute Audio">
+                            🔊
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Live Camera Telemetry -->
+                <div class="viewport-telemetry">
+                    <span id="hud-telemetry">FPS: -- · YOLOv8n</span>
+                </div>
+            </section>
+
+            <!-- Bottom Riddle Drawer -->
+            <section id="riddle-card" class="riddle-drawer">
+                <div class="riddle-drawer-header">
+                    <span id="riddle-round-number" class="riddle-meta">ROUND 1 RIDDLE</span>
+                    <button id="btn-skip" class="btn-skip-link">SKIP ROUND</button>
+                </div>
+
+                <div class="riddle-body">
+                    <p id="riddle-text" class="riddle-quote">Loading clue...</p>
+
+                    <!-- Accordion Hints -->
+                    <div id="hint-1-box" class="hint-accordion-content" style="display: none;">
+                        <span class="hint-tag">HINT 1</span>
+                        <p id="hint-1-text"></p>
+                    </div>
+                    <div id="hint-2-box" class="hint-accordion-content" style="display: none;">
+                        <span class="hint-tag">HINT 2</span>
+                        <p id="hint-2-text"></p>
+                    </div>
+                </div>
+
+                <!-- Action Bar -->
+                <footer class="riddle-actions">
+                    <button id="btn-hint-1" class="btn btn-hint">
+                        <span>HINT 1</span>
+                        <span class="cost-tag">-150</span>
+                    </button>
+                    <button id="btn-hint-2" class="btn btn-hint">
+                        <span>HINT 2</span>
+                        <span class="cost-tag">-250</span>
+                    </button>
+                </footer>
+            </section>
+        </main>
+
+
+        <!-- ==================== 3. ROUND RESULT VIEW ==================== -->
+        <main id="view-round-result" class="app-view">
+            <div class="result-modal-card">
+                <header class="result-header">
+                    <span id="result-title" class="result-status-badge">TARGET CONFIRMED</span>
+                    <span id="result-subtitle" class="result-sub">Found in 22s</span>
+                </header>
+
+                <h2 id="result-object-name" class="result-object">COFFEE MUG</h2>
+
+                <!-- Captured Snapshot Frame -->
+                <div class="snapshot-frame">
+                    <img id="result-snapshot" alt="Target Snapshot" src="" style="display: none;">
+                </div>
+
+                <!-- Score Breakdown -->
+                <div class="breakdown-table">
+                    <div class="breakdown-row">
+                        <span>Base Points</span>
+                        <span id="score-base" class="val-mono">+1,000</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span>Speed Bonus</span>
+                        <span id="score-time" class="val-mono">+450</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span>Hint Deductions</span>
+                        <span id="score-penalty" class="val-mono">-0</span>
+                    </div>
+                    <div class="breakdown-row">
+                        <span>Clean Solve Bonus</span>
+                        <span id="score-clean" class="val-mono">+200</span>
+                    </div>
+                    <div class="breakdown-row total-row">
+                        <span>Round Total</span>
+                        <span id="score-total" class="val-mono">+1,650 PTS</span>
+                    </div>
+                </div>
+
+                <button id="btn-next-round" class="btn btn-primary btn-large">
+                    <span>NEXT RIDDLE</span>
+                    <span class="btn-arrow">→</span>
+                </button>
+            </div>
+        </main>
+
+
+        <!-- ==================== 4. FINAL SCORECARD VIEW ==================== -->
+        <main id="view-final-scorecard" class="app-view">
+            <div class="scorecard-wrapper">
+                <header class="scorecard-header">
+                    <span class="scorecard-pre">HUNT COMPLETE</span>
+                    <h1 id="final-total-score" class="scorecard-hero">6,840 PTS</h1>
+                    <div id="final-rank-title" class="scorecard-rank">MASTER DETECTIVE ★★★</div>
+                </header>
+
+                <!-- Statistics Pills -->
+                <div id="final-summary-stats" class="stats-grid">
+                    <!-- Injected via JavaScript -->
+                </div>
+
+                <!-- Round by Round Recap -->
+                <div class="recap-section">
+                    <h3 class="recap-title">ROUND RECAP</h3>
+                    <div id="final-rounds-list" class="recap-list">
+                        <!-- Injected via JavaScript -->
+                    </div>
+                </div>
+
+                <footer class="scorecard-footer">
+                    <button id="btn-play-again" class="btn btn-primary btn-large">
+                        <span>PLAY AGAIN</span>
+                        <span class="btn-arrow">↺</span>
+                    </button>
+                </footer>
+            </div>
+        </main>
+
+
+        <!-- ==================== SETTINGS MODAL ==================== -->
+        <div id="settings-modal" class="modal-backdrop">
+            <div class="modal-dialog">
+                <header class="modal-header">
+                    <h3>GenAI Riddler Settings</h3>
+                    <button id="btn-close-settings" class="modal-close">&times;</button>
+                </header>
+                <div class="modal-content">
+                    <p class="modal-desc">
+                        By default, the game uses a curated offline catalog of 50+ tested indoor riddles with zero latency. 
+                        You can optionally connect a free Google Gemini or Groq API key for dynamic generation.
+                    </p>
+
+                    <div class="form-group">
+                        <label for="ai-provider-select">Provider</label>
+                        <select id="ai-provider-select" class="form-select">
+                            <option value="gemini">Google Gemini (Free 1.5 Flash)</option>
+                            <option value="groq">Groq (Free Llama 3.1 8B)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ai-api-key-input">API Key</label>
+                        <input id="ai-api-key-input" type="password" class="form-input" placeholder="Paste your API key here">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="detection-confidence">Detection confidence: <span id="detection-confidence-value">35%</span></label>
+                        <input id="detection-confidence" class="form-input" type="range" min="10" max="80" step="5" value="35">
+                    </div>
+                    <div class="form-group">
+                        <label for="detection-lock-duration">Lock time: <span id="detection-lock-duration-value">300 ms</span></label>
+                        <input id="detection-lock-duration" class="form-input" type="range" min="0" max="1200" step="100" value="300">
+                    </div>
+
+                    <div id="ai-status-text" class="status-msg"></div>
+                </div>
+                <footer class="modal-footer">
+                    <button id="btn-save-ai" class="btn btn-primary">Save & Apply</button>
+                </footer>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Application Scripts -->
+    <script src="/static/js/audio.js"></script>
+    <script src="/static/js/camera.js"></script>
+    <script src="/static/js/detection.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
