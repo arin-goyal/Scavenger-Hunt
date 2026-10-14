@@ -1,5 +1,7 @@
 # SCAVENGER // YOLO AR Object Hunt
 
+**Play the live app:** [scavenger-hunt-275611243774.asia-south1.run.app](https://scavenger-hunt-275611243774.asia-south1.run.app)
+
 A minimalist, responsive Augmented Reality Scavenger Hunt game where players solve riddles and locate real-world everyday objects using their device camera and real-time **YOLOv8** computer vision.
 
 ---
